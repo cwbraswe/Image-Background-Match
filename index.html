@@ -1,117 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Hold Shift to Check Multiple Checkboxes</title>
-  <link rel="icon" href="https://fav.farm/🔥" />
-</head>
-<body>
-  <style>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hold Shift to Check Multiple Checkboxes</title>
+    <link rel="icon" href="https://fav.farm/🔥" />
+  </head>
+  <body>
+    <style>
+      html {
+        font-family: sans-serif;
+        background: #99907d;
+      }
+      .item__image-container {
+        transition: all 0.3s ease;
 
-    html {
-      font-family: sans-serif;
-      background: #706C61;
-    }
+        border: 40px solid #000;
+        outline: 1px solid rgba(255, 255, 255, 0.08);
+      }
 
-    .inbox {
-      max-width: 400px;
-      margin: 50px auto;
-      background: white;
-      border-radius: 5px;
-      box-shadow: 10px 10px 0 rgba(0,0,0,0.1);
-    }
+      .item__image {
+        display: block;
 
-    .item {
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid #F1F1F1;
-    }
+        width: 100%;
 
-    .item:last-child {
-      border-bottom: 0;
-    }
+        outline: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .inbox {
+        max-width: 400px;
+        margin: 50px auto;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.1);
+      }
 
-    input:checked + p {
-      background: #F9F9F9;
-      text-decoration: line-through;
-    }
+      .item {
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #f1f1f1;
+      }
 
-    input[type="checkbox"] {
-      margin: 20px;
-    }
+      .item:last-child {
+        border-bottom: 0;
+      }
 
-    p {
-      margin: 0;
-      padding: 20px;
-      transition: background 0.2s;
-      flex: 1;
-      font-family:'helvetica neue';
-      font-size: 20px;
-      font-weight: 200;
-      border-left: 1px solid #D1E2FF;
-    }
-  </style>
-   <!--
+      label {
+        background-color: indigo;
+        color: white;
+        padding: 0.5rem;
+        font-family: sans-serif;
+        border-radius: 0.3rem;
+        cursor: pointer;
+        margin: 5px auto;
+        display: flex;
+        justify-content: space-around;
+        width: 50%;
+      }
+
+      p {
+        margin: 0;
+        padding: 20px;
+        transition: background 0.2s;
+        flex: 1;
+        font-family: "helvetica neue";
+        font-size: 20px;
+        font-weight: 200;
+        border-left: 1px solid #d1e2ff;
+      }
+    </style>
+    <!--
    The following is a common layout you would see in an email client.
    When a user clicks a checkbox, holds Shift, and then clicks another checkbox a few rows down, all the checkboxes inbetween those two checkboxes should be checked.
   -->
-  <div class="inbox">
-    <div class="item">
-      <input type="checkbox">
-      <p>This is an inbox layout.</p>
+    <div class="inbox">
+      <div class="item__image-container">
+        <form>
+          <input id="picField" name="file" type="file" hidden />
+          <label for="actual-btn" onclick="document.getElementById('picField').click()">Choose File</label>
+          <img src="beach.png" id="picture" class="item__image" />
+        </form>
+        <div>
+          Choose a file to upload and the border will change to match the images
+          dominant color!
+        </div>
+      </div>
     </div>
-    <div class="item">
-      <input type="checkbox">
-      <p>Check one item</p>
-    </div>
-    <div class="item">
-      <input type="checkbox">
-      <p>Hold down your Shift key</p>
-    </div>
-    <div class="item">
-      <input type="checkbox">
-      <p>Check a lower item</p>
-    </div>
-    <div class="item">
-      <input type="checkbox">
-      <p>Everything in between should also be set to checked</p>
-    </div>
-    <div class="item">
-      <input type="checkbox">
-      <p>A simple but very useful feature</p>
-    </div>
-    <div class="item">
-      <input type="checkbox">
-      <p>Just regular JavaScript</p>
-    </div>
-    <div class="item">
-      <input type="checkbox">
-      <p>Pretty cool stuff!</p>
-    </div>
-    <div class="item">
-      <input type="checkbox">
-      <p>Thanks for trying it out!</p>
-    </div>
-  </div>
 
-<script>
-  const checkboxes = document.querySelectorAll('.inbox input[type="checkbox"]');
- let lastChecked;
-  function handleCheck(e) {
-    if (e.shiftKey && this.checked){
-      let inBetween = false;
-      checkboxes.forEach(checkbox => {
-        if(checkbox === this || checkbox === lastChecked) {
-          inBetween = !inBetween;
+    <script src="https://unpkg.com/fast-average-color/dist/index.browser.min.js"></script>
+    <script>
+      function changeColor() {
+        const fac = new FastAverageColor();
+        const container = document.querySelector(".item__image-container");
+
+        fac
+          .getColorAsync(container.querySelector("img"))
+          .then((color) => {
+            container.style.backgroundColor = color.rgba;
+            container.style.borderColor = color.rgba;
+            container.style.boxShadow = "0 0 50px " + color.rgba;
+            container.style.color = color.isDark ? "#fff" : "#000";
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+      document.getElementById("picField").onchange = function (evt) {
+        var tgt = evt.target || window.event.srcElement,
+          files = tgt.files;
+
+        // FileReader support
+        if (FileReader && files && files.length) {
+          var fr = new FileReader();
+          fr.onload = function () {
+            document.getElementById("picture").src = fr.result;
+            changeColor();
+          };
+          fr.readAsDataURL(files[0]);
         }
-        if (inBetween) {
-          checkbox.checked = true;
+
+        // Not supported
+        else {
+          // fallback -- perhaps submit the input to an iframe and temporarily store
+          // them on the server until the user's session ends.
         }
-      });
-    }
-    lastChecked = this;
-  }
-  checkboxes.forEach(checkbox => checkbox.addEventListener('click', handleCheck))
-</script>
-</body>
+      };
+    </script>
+  </body>
 </html>
